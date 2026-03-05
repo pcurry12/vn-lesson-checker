@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson Plan Checker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:#F0EBE3;-webkit-font-smoothing:antialiased}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+textarea,input,select,button{font-family:inherit}
+.frame{max-width:420px;margin:20px auto;background:#fff;border-radius:28px;box-shadow:0 8px 40px rgba(0,0,0,.12);overflow:hidden;border:1px solid #E5E0DA;display:flex;flex-direction:column;height:92vh}
+.hdr{background:#166534;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hdr-icon{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.bod{flex:1;overflow-y:auto;padding:10px 12px 32px}
+.bub{margin-bottom:10px;animation:fadeUp .35s ease}
+.bub-in{border-radius:16px;padding:10px 14px;font-size:13px;line-height:1.5;background:#fff;border:1px solid #E5E0DA;border-bottom-left-radius:5px;color:#2C2C2C}
+.dv{display:flex;align-items:center;gap:8px;margin:16px 0 10px}
+.dv-line{flex:1;height:1px;background:#E5E0DA}
+.dv-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#166534;background:#E8F3ED;padding:3px 12px;border-radius:100px;white-space:nowrap}
+.tog{display:flex;border-radius:10px;overflow:hidden;border:2px solid #E5E0DA}
+.tog-btn{flex:1;padding:7px 0;text-align:center;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.col-wrap{display:flex;flex-direction:column;gap:6px;margin:4px 0 6px}
+.col-l{background:#F0EDEA;border:1px solid #D5D0C8;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.45;color:#888}
+.col-r{background:#FCFFFE;border:2px solid #22A652;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.45;color:#1a1a1a}
+.col-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.rat{font-size:11.5px;color:#555;font-style:italic;margin:4px 0 10px;padding-left:2px}
+.btn-accept{padding:6px 14px;background:#22A652;color:#fff;font-size:11.5px;border-radius:8px;font-weight:600;border:none;cursor:pointer}
+.btn-edit{padding:6px 14px;background:#fff;color:#666;font-size:11.5px;border-radius:8px;font-weight:600;border:1.5px solid #CCC;cursor:pointer}
+.btn-keep{padding:6px 12px;background:#fff;color:#AAA;font-size:10.5px;border-radius:8px;font-weight:500;border:1px solid #DDD;cursor:pointer}
+.btn-next{padding:8px 18px;background:#166534;color:#fff;font-size:12px;border-radius:10px;font-weight:600;border:none;cursor:pointer;margin-top:10px;display:block}
+.btn-final{padding:10px;background:#166534;color:#fff;font-size:14px;border-radius:10px;font-weight:600;border:none;cursor:pointer;margin-top:8px;display:block;width:100%}
+.edit-ta{width:100%;padding:10px 12px;border-radius:10px;border:2px solid #22A652;font-size:12.5px;line-height:1.5;background:#FAFFF8;resize:none;outline:none;min-height:90px}
+.card-accepted{background:#FCFFFE;border:2px solid #22A652;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5;position:relative}
+.card-kept{background:#F0EDEA;border:1.5px solid #BBB;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:#777;position:relative}
+.badge{position:absolute;top:5px;right:6px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:1px 6px;border-radius:4px}
+.badge-ok{color:#22A652;background:#D4F5DD}
+.badge-kept{color:#999;background:#E8E5E0}
+.act-card{background:#EEFBF2;border:1px solid #B8D9C5;border-radius:8px;padding:7px 10px;font-size:11.5px;margin-bottom:4px}
+.sum-card{background:#FAFAF8;border:1.5px solid #E5E0DA;border-radius:14px;padding:14px}
+.sum-sec{margin-top:8px;padding-top:6px;border-top:1px solid #E5E0DA}
+.sum-label{font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#166534;margin-bottom:2px}
+.sum-text{font-size:12px;line-height:1.5}
+.teal{color:#065F4E;font-weight:600;background:#D1FAE5;padding:0 3px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.chip{font-size:10px;padding:2px 8px;border-radius:6px;display:inline-block}
+.build-prompt{background:#FFF9E6;border:1.5px solid #F5D34E;border-radius:10px;padding:10px 12px;margin-top:8px}
+.build-form{background:#F9FAFB;border:1.5px solid #E5E0DA;border-radius:10px;padding:10px 12px;margin-top:6px}
+.build-field{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #DDD;font-size:12px;line-height:1.4;background:#fff;resize:none;outline:none;min-height:40px}
+.build-field:focus{border-color:#22A652}
+.build-label{font-size:10px;font-weight:600;color:#666;margin-bottom:3px;margin-top:8px}
+.build-label:first-child{margin-top:0}
+.yn-wrap{display:flex;gap:6px;margin-top:6px}
+.yn-btn{flex:1;padding:7px;text-align:center;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid #E5E0DA;background:#fff;transition:all .15s}
+.opt-card{padding:8px 12px;border-radius:10px;font-size:12.5px;border:2px solid #E5E0DA;cursor:pointer;margin-bottom:5px;transition:all .15s;background:#fff}
+.opt-card:hover{border-color:#B8D9C5}
+.opt-card.sel{border-color:#22A652;background:#EEFBF2}
+.kb-notice{background:#EEFBF2;border:1.5px solid #22A652;border-radius:12px;padding:10px 14px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+var LQ = "\u201C";
+var RQ = "\u201D";
+var EM = "\u2014";
+var AP = "\u2019";
+var DOT = "\u00B7";
+function q(s) { return LQ + s + RQ; }
+
+/* ===== BOOK KB (same as builder) ===== */
+var BOOK_KB = {
+  "The Ugly Duckling": {
+    about: "A duckling is rejected by other animals for being different, but eventually discovers he is actually a beautiful swan.",
+    charName: "the duckling",
+    weakSugg: {
+      before: "Show cover, read title, author, and illustrator. Introduce " + q("ugly") + " (not nice to look at) and " + q("duckling") + " (a baby duck). Ask " + q("What do you notice about the duckling on the cover? How do you think he feels?"),
+      during: "Read with expression. Pause 1: After the other animals reject the duckling " + EM + " " + q("How does he feel? What tells you that?") + " Pause 2: When the duckling sees the swans " + EM + " point to illustration, " + q("Why do you think he is scared?") + " Keep pauses brief.",
+      after: "Turn and Talk: " + q("Why did the other animals treat the duckling that way?") + " Activity: " + q("Draw the duckling at the beginning and at the end. What changed?") + " Then tell your partner.",
+    },
+    weakRat: {
+      before: "Vocab + a cover question about the duckling gets students inferring about his feelings before page one.",
+      during: "Two pauses at key rejection moments with " + q("what tells you that?") + " builds inference from the illustrations.",
+      after: "Asking " + q("why") + " pushes past opinion; drawing beginning vs. end requires inferring what changed.",
+    },
+    extras: [
+      "Inference Ladder: " + q("Text says") + " / " + q("I know") + " / " + q("I infer") + " about the duckling " + EM + " do one together first.",
+      "Freeze!: Students freeze as the duckling when rejected. Partners guess how he feels and why.",
+    ],
+  },
+  "Each Kindness": {
+    about: "Chloe and her friends refuse to be kind to the new girl Maya. When Maya leaves, Chloe realizes she missed every chance to be kind.",
+    charName: "Chloe",
+    weakSugg: {
+      before: "Show cover, read title, author, and illustrator. Introduce " + q("kindness") + " (being nice and helpful) and " + q("ripple") + " (a small wave that spreads out). Ask " + q("What do you notice about the two girls on the cover? What do you think is happening between them?"),
+      during: "Read with expression. Pause 1: When Chloe and her friends ignore Maya at lunch " + EM + " " + q("How do you think Maya feels? What clues tell you that?") + " Pause 2: When the teacher drops a stone in the water " + EM + " " + q("What do you think the teacher is trying to show them?") + " Keep pauses brief.",
+      after: "Turn and Talk: " + q("Why do you think Chloe never chose to be kind to Maya?") + " Activity: " + q("Draw Chloe at the beginning and at the end. How did her feelings change?") + " Then tell your partner.",
+    },
+    weakRat: {
+      before: "Vocab + a cover question about the two girls starts inference about their relationship.",
+      during: "Pausing at the rejection and ripple scenes builds inference about feelings and metaphor.",
+      after: "Asking " + q("why Chloe never chose") + " requires inferring motivation; drawing feelings change tracks character inference.",
+    },
+    extras: [
+      "Inference Ladder: " + q("Text says") + " / " + q("I know") + " / " + q("I infer") + " about Chloe " + EM + " do one together first.",
+      "Ripple drawing: Draw one kind act in the middle. What ripples out from it?",
+    ],
+  },
+  "Those Shoes": {
+    about: "Jeremy wants the cool shoes all the other kids have, but his family cannot afford them. He finds a too-small pair at a thrift store, then gives them to a friend who needs them.",
+    charName: "Jeremy",
+    weakSugg: {
+      before: "Show cover, read title, author, and illustrator. Introduce " + q("thrift store") + " (a shop that sells used things for less money) and " + q("afford") + " (having enough money to buy something). Ask " + q("What do you notice about the shoes on the cover? What do you think this story might be about?"),
+      during: "Read with expression. Pause 1: When Jeremy squeezes into the too-small shoes " + EM + " " + q("Why do you think he bought shoes that don" + AP + "t fit? What clues tell you?") + " Pause 2: When Jeremy sees Antonio" + AP + "s broken shoes in the snow " + EM + " " + q("What do you think Jeremy is thinking right now?") + " Keep pauses brief.",
+      after: "Turn and Talk: " + q("Why did Jeremy give the shoes to Antonio? How do you know?") + " Activity: " + q("Draw the moment Jeremy makes his decision. What was he thinking?") + " Then tell your partner.",
+    },
+    weakRat: {
+      before: "Vocab + a cover question about the shoes starts inference about wants vs. needs.",
+      during: "Pausing at the too-small shoes and Antonio" + AP + "s broken shoes builds inference about Jeremy" + AP + "s thinking.",
+      after: "Asking " + q("why") + " he gave them away requires inferring generosity; drawing the decision moment captures his internal reasoning.",
+    },
+    extras: [
+      "Inference Ladder: " + q("Text says") + " / " + q("I know") + " / " + q("I infer") + " about Jeremy " + EM + " do one together first.",
+      "Want vs. Need chart: What did Jeremy want? What did Antonio need? What did Jeremy do?",
+    ],
+  },
+};
+
+/* ===== PLAN DATA ===== */
+/* Strong plan data (always book-specific since teacher gave details) */
+var strongOrig = {
+  before: "Show cover. Ask what they think the story is about. Introduce " + q("ugly") + " and " + q("duckling.") + " Ask " + q("How do you think he feels?") + " Predict what will happen.",
+  during: "Read with expression. Explain " + q("rejected") + " when it comes up. Pause 1: After rejected " + EM + " ask " + q("How does he feel?") + " Pause 2: Sees swans " + EM + " ask " + q("Why is he scared?"),
+  after: "Turn and Talk: " + q("Why did the other animals treat the duckling that way? What did he learn about himself?") + " Activity: Draw the duckling at beginning and end. What changed?",
+};
+var strongSugg = {
+  before: "Show cover, read title, author, and illustrator. Introduce " + q("ugly") + " (not nice to look at) and " + q("duckling") + " (a baby duck). Ask " + q("How do you think he is feeling? What makes you think that?") + " Ask students to predict what will happen.",
+  during: "Read with expression. Explain " + q("rejected") + " in context (quick definition, keep going). Pause 1: After rejected " + EM + " " + q("How does he feel? What makes you think that?") + " Pause 2: Sees swans " + EM + " point to illustration, " + q("Why is he scared?"),
+  after: "Turn and Talk: " + q("Why did the other animals treat the duckling that way? What did he learn about himself?") + " Activity: Draw the duckling at beginning and end " + EM + " what changed? Then explain to a partner why.",
+};
+var strongRat = {
+  before: "Definitions help access; " + q("what makes you think that?") + " starts inference from the cover.",
+  during: "Evidence prompts turn " + q("how does he feel") + " from a guess into inference.",
+  after: "Partner explanation makes students articulate their inference, not just draw it.",
+};
+
+var weakOrig = {
+  before: "Show cover. Read title.",
+  during: "Read the story to students.",
+  after: "Ask students if they liked the story. Ask them to draw a picture.",
+};
+
+/* Generic weak suggestions (when book NOT in KB) */
+var weakSuggGeneric = {
+  before: "Show cover, read title, author, and illustrator. Pick 1" + EM + "2 words students will need to follow the story and introduce them with simple definitions. Ask " + q("What do you notice on the cover? What do you think might happen?"),
+  during: "Read with expression. Pick 1" + EM + "2 key moments to pause and ask: " + q("How is [character name] feeling right now? What clues tell you that?") + " or " + q("Why do you think that happened?") + " Keep pauses brief.",
+  after: "Turn and Talk: " + q("Why did [character name] do that? How do you know?") + " Activity: " + q("Draw how [character name] felt at the beginning and at the end. What changed?") + " Then tell your partner.",
+};
+var weakRatGeneric = {
+  before: "A cover question starts inference; vocab words you choose remove barriers to comprehension.",
+  during: "Pausing with " + q("what clues tell you") + " questions builds inference into the reading.",
+  after: "Specific prompts push students from opinion (" + q("did you like it") + ") to evidence-based inference.",
+};
+var genericExtras = [
+  "Inference Ladder: " + q("Text says") + " / " + q("I know") + " / " + q("I infer") + " " + EM + " do one together first.",
+  "Freeze!: Re-read a key moment. Students freeze as [character name]. Partners guess how they feel and why.",
+];
+
+function hasPlaceholders(text) {
+  return text.indexOf("[character name]") >= 0 || text.indexOf("Pick 1") >= 0 || text.indexOf("key moments") >= 0;
+}
+
+/* ===== Strong plan SuggView (highlights, doesn't change) ===== */
+function StrongSuggView(props) {
+  var k = props.sec;
+  if (k === "before") {
+    return <span>Show cover, <span className="teal">read title, author, and illustrator.</span> Introduce {q("ugly")} <span className="teal">(not nice to look at)</span> and {q("duckling")} <span className="teal">(a baby duck).</span> Ask {q("How do you think he is feeling? ")}<span className="teal">What makes you think that?</span>{RQ} Ask students to predict what will happen.</span>;
+  }
+  if (k === "during") {
+    return <span>Read with expression. Explain {q("rejected")} <span className="teal">in context (quick definition, keep going).</span> Pause 1: After rejected {EM} {q("How does he feel? ")}<span className="teal">What makes you think that?</span>{RQ} Pause 2: Sees swans {EM} <span className="teal">point to illustration,</span> {q("Why is he scared?")}</span>;
+  }
+  if (k === "after") {
+    return <span>Turn and Talk: {q("Why did the other animals treat the duckling that way? What did he learn about himself?")} Activity: Draw the duckling at beginning and end {EM} what changed? <span className="teal">Then explain to a partner why.</span></span>;
+  }
+  return <span></span>;
+}
+
+function App() {
+  var modeState = React.useState("strong");
+  var mode = modeState[0]; var setMode = modeState[1];
+  var stepState = React.useState(0);
+  var step = stepState[0]; var setStep = stepState[1];
+
+  var genreState = React.useState("");
+  var genre = genreState[0]; var setGenre = genreState[1];
+  var charState = React.useState("");
+  var hasChar = charState[0]; var setHasChar = charState[1];
+  var illusState = React.useState("");
+  var hasIllus = illusState[0]; var setHasIllus = illusState[1];
+  var aboutState = React.useState("");
+  var bookAbout = aboutState[0]; var setBookAbout = aboutState[1];
+
+  var stsState = React.useState({before:"review",during:"review",after:"review"});
+  var statuses = stsState[0]; var setSts = stsState[1];
+  var edsState = React.useState({before:"",during:"",after:""});
+  var edits = edsState[0]; var setEdits = edsState[1];
+  var bfState = React.useState({vocabWords:"",coverQ:"",pause1Where:"",pause1What:"",pause2Where:"",pause2What:"",ttQ:"",actPrompt:""});
+  var buildFields = bfState[0]; var setBuildFields = bfState[1];
+  var endRef = React.useRef(null);
+
+  /* KB toggle for demo */
+  var kbTogState = React.useState("inlib");
+  var kbTog = kbTogState[0]; var setKbTog = kbTogState[1];
+
+  var bookTitle = "The Ugly Duckling";
+  var kb = (kbTog === "inlib" && BOOK_KB[bookTitle]) ? BOOK_KB[bookTitle] : null;
+  var isKB = kb ? true : false;
+
+  /* Compute suggestions based on mode + KB */
+  function getOrig(sec) { return mode === "strong" ? strongOrig[sec] : weakOrig[sec]; }
+  function getSugg(sec) {
+    if (mode === "strong") return strongSugg[sec];
+    if (isKB) return kb.weakSugg[sec];
+    return weakSuggGeneric[sec];
+  }
+  function getRat(sec) {
+    if (mode === "strong") return strongRat[sec];
+    if (isKB) return kb.weakRat[sec];
+    return weakRatGeneric[sec];
+  }
+  function getExtras() {
+    if (isKB) return kb.extras;
+    return genericExtras;
+  }
+
+  function scroll() { setTimeout(function(){ if(endRef.current) endRef.current.scrollIntoView({behavior:"smooth"}); }, 150); }
+  function go(s) { setStep(s); scroll(); }
+  React.useEffect(scroll, [step, mode, statuses]);
+
+  function switchMode(m) {
+    setMode(m); setStep(0); setGenre(""); setHasChar(""); setHasIllus(""); setBookAbout(""); setKbTog("inlib");
+    setSts({before:"review",during:"review",after:"review"});
+    setEdits({before:"",during:"",after:""});
+    setBuildFields({vocabWords:"",coverQ:"",pause1Where:"",pause1What:"",pause2Where:"",pause2What:"",ttQ:"",actPrompt:""});
+  }
+
+  function updateStatus(sec,val) { setSts(function(p){ var n={before:p.before,during:p.during,after:p.after}; n[sec]=val; return n; }); }
+  function updateEdit(sec,val) { setEdits(function(p){ var n={before:p.before,during:p.during,after:p.after}; n[sec]=val; return n; }); }
+  function updateBF(key,val) { setBuildFields(function(p){ var n={}; for(var k in p) n[k]=p[k]; n[key]=val; return n; }); }
+
+  var nextStep = {before:3, during:4, after:5};
+  function advance(sec) { setTimeout(function(){ go(nextStep[sec]); }, 400); }
+
+  function doAccept(sec) {
+    var sugg = getSugg(sec);
+    updateStatus(sec, "accepted");
+    if (!edits[sec]) updateEdit(sec, sugg);
+    if (hasPlaceholders(sugg)) {
+      setTimeout(function(){ updateStatus(sec, "buildprompt"); scroll(); }, 300);
+    } else { advance(sec); }
+  }
+  function doEdit(sec) {
+    updateStatus(sec, "editing");
+    if (!edits[sec]) updateEdit(sec, getSugg(sec));
+  }
+  function doSave(sec) {
+    updateStatus(sec, "accepted");
+    var txt = edits[sec] || "";
+    if (hasPlaceholders(txt)) {
+      setTimeout(function(){ updateStatus(sec, "buildprompt"); scroll(); }, 300);
+    } else { advance(sec); }
+  }
+  function doKeep(sec) {
+    updateStatus(sec, "kept");
+    updateEdit(sec, getOrig(sec));
+    advance(sec);
+  }
+  function startBuilding(sec) { updateStatus(sec, "building"); scroll(); }
+  function skipBuilding(sec) { updateStatus(sec, "accepted"); advance(sec); }
+
+  function finishBuilding(sec) {
+    var aiVersion = getSugg(sec);
+    if (sec === "before" && !buildFields.vocabWords && !buildFields.coverQ) { updateEdit(sec, aiVersion); updateStatus(sec, "accepted"); advance(sec); return; }
+    if (sec === "during" && !buildFields.pause1Where && !buildFields.pause1What && !buildFields.pause2Where && !buildFields.pause2What) { updateEdit(sec, aiVersion); updateStatus(sec, "accepted"); advance(sec); return; }
+    if (sec === "after" && !buildFields.ttQ && !buildFields.actPrompt) { updateEdit(sec, aiVersion); updateStatus(sec, "accepted"); advance(sec); return; }
+    var txt = aiVersion;
+    if (sec === "before") {
+      var p = ["Show cover, read title, author, and illustrator."];
+      if (buildFields.vocabWords) p.push("Introduce: " + buildFields.vocabWords + ".");
+      if (buildFields.coverQ) p.push("Ask: " + q(buildFields.coverQ));
+      txt = p.join(" ");
+    }
+    if (sec === "during") {
+      var p = ["Read with expression."];
+      if (buildFields.pause1Where || buildFields.pause1What) p.push("Pause 1: " + (buildFields.pause1Where || "a key moment") + " " + EM + " " + (buildFields.pause1What || "ask an inference question"));
+      if (buildFields.pause2Where || buildFields.pause2What) p.push("Pause 2: " + (buildFields.pause2Where || "another key moment") + " " + EM + " " + (buildFields.pause2What || "ask an inference question"));
+      p.push("Keep pauses brief.");
+      txt = p.join(" ");
+    }
+    if (sec === "after") {
+      var p = [];
+      if (buildFields.ttQ) p.push("Turn and Talk: " + q(buildFields.ttQ));
+      if (buildFields.actPrompt) p.push("Activity: " + q(buildFields.actPrompt) + " Then tell your partner.");
+      if (p.length === 0) txt = aiVersion; else txt = p.join(" ");
+    }
+    updateEdit(sec, txt); updateStatus(sec, "accepted"); advance(sec);
+  }
+
+  function isDone(sec) { var s=statuses[sec]; return s==="accepted" || s==="kept"; }
+  function getFinal(sec) { return edits[sec] || getSugg(sec); }
+
+  function renderSection(sec) {
+    var st = statuses[sec];
+    if (st === "accepted") {
+      return (
+        <div className="card-accepted">
+          <span className="badge badge-ok">{"\u2713"} Accepted</span>
+          <div className="col-label" style={{color:"#22A652",marginBottom:4}}>Your updated plan</div>
+          <div>{edits[sec] || getSugg(sec)}</div>
+          <div style={{marginTop:6}}><button className="btn-keep" onClick={function(){updateStatus(sec,"review")}}>Change</button></div>
+        </div>
+      );
+    }
+    if (st === "buildprompt") {
+      return (
+        <div>
+          <div className="card-accepted" style={{borderColor:"#F5D34E"}}>
+            <div className="col-label" style={{color:"#22A652",marginBottom:4}}>Accepted</div>
+            <div>{edits[sec] || getSugg(sec)}</div>
+          </div>
+          <div className="build-prompt">
+            <div style={{fontSize:12.5,fontWeight:600,color:"#7A6A1F"}}>Want to fill in the details for your book?</div>
+            <div style={{fontSize:11,color:"#8B7A2B",marginTop:2}}>A few quick details will make your plan specific.</div>
+            <div className="yn-wrap">
+              <button className="yn-btn" onClick={function(){startBuilding(sec)}} style={{borderColor:"#22A652",color:"#166534",background:"#EEFBF2"}}>Yes, build it out</button>
+              <button className="yn-btn" onClick={function(){skipBuilding(sec)}} style={{color:"#999"}}>{"Skip for now \u2192"}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (st === "building") {
+      return (
+        <div>
+          <div className="card-accepted" style={{borderColor:"#B8D9C5",opacity:0.6,fontSize:11}}>
+            <div>{edits[sec] || getSugg(sec)}</div>
+          </div>
+          {sec === "before" && <div className="build-form">
+            <div className="build-label">What words will you introduce? (with simple definitions)</div>
+            <textarea className="build-field" value={buildFields.vocabWords} onChange={function(e){updateBF("vocabWords",e.target.value)}} placeholder="e.g. word1 (simple meaning), word2 (simple meaning)" rows="2"/>
+            <div className="build-label">What will you ask about the cover?</div>
+            <textarea className="build-field" value={buildFields.coverQ} onChange={function(e){updateBF("coverQ",e.target.value)}} placeholder="e.g. What do you notice on the cover?" rows="2"/>
+            <button className="btn-accept" style={{marginTop:8}} onClick={function(){finishBuilding("before")}}>Done</button>
+          </div>}
+          {sec === "during" && <div className="build-form">
+            <div style={{fontSize:11,fontWeight:600,color:"#166534",marginBottom:6}}>Pause 1</div>
+            <div className="build-label">Where in the book?</div>
+            <input className="build-field" value={buildFields.pause1Where} onChange={function(e){updateBF("pause1Where",e.target.value)}} placeholder="e.g. After something important happens"/>
+            <div className="build-label">What will you do?</div>
+            <input className="build-field" value={buildFields.pause1What} onChange={function(e){updateBF("pause1What",e.target.value)}} placeholder="e.g. Ask: How is the character feeling?"/>
+            <div style={{fontSize:11,fontWeight:600,color:"#166534",marginTop:10,marginBottom:6}}>Pause 2</div>
+            <div className="build-label">Where in the book?</div>
+            <input className="build-field" value={buildFields.pause2Where} onChange={function(e){updateBF("pause2Where",e.target.value)}} placeholder="e.g. At a surprising moment"/>
+            <div className="build-label">What will you do?</div>
+            <input className="build-field" value={buildFields.pause2What} onChange={function(e){updateBF("pause2What",e.target.value)}} placeholder="e.g. Ask: Why do you think that happened?"/>
+            <button className="btn-accept" style={{marginTop:8}} onClick={function(){finishBuilding("during")}}>Done</button>
+          </div>}
+          {sec === "after" && <div className="build-form">
+            <div className="build-label">What Turn and Talk question will you use?</div>
+            <textarea className="build-field" value={buildFields.ttQ} onChange={function(e){updateBF("ttQ",e.target.value)}} placeholder="e.g. Why did the character do that?" rows="2"/>
+            <div className="build-label">What will the activity prompt be?</div>
+            <textarea className="build-field" value={buildFields.actPrompt} onChange={function(e){updateBF("actPrompt",e.target.value)}} placeholder="e.g. Draw the character at beginning and end." rows="2"/>
+            <button className="btn-accept" style={{marginTop:8}} onClick={function(){finishBuilding("after")}}>Done</button>
+          </div>}
+        </div>
+      );
+    }
+    if (st === "editing") {
+      return (
+        <div>
+          <div className="col-label" style={{color:"#22A652",fontSize:9,marginBottom:4}}>Edit to make it yours:</div>
+          <textarea className="edit-ta" value={edits[sec]} onChange={function(e){updateEdit(sec,e.target.value)}} />
+          <div style={{display:"flex",gap:6,marginTop:6}}>
+            <button className="btn-accept" onClick={function(){doSave(sec)}}>Accept changes</button>
+            <button className="btn-keep" onClick={function(){updateStatus(sec,"review")}}>Back</button>
+          </div>
+        </div>
+      );
+    }
+    if (st === "kept") {
+      return (
+        <div className="card-kept">
+          <span className="badge badge-kept">Kept</span>
+          <div className="col-label" style={{color:"#999",marginBottom:4}}>Your original</div>
+          <div>{getOrig(sec)}</div>
+          <div style={{marginTop:6}}><button className="btn-keep" onClick={function(){updateStatus(sec,"review")}}>Change</button></div>
+        </div>
+      );
+    }
+    /* Default: review */
+    return (
+      <div>
+        <div className="col-wrap">
+          <div className="col-l">
+            <div className="col-label" style={{color:"#AAA"}}>Yours</div>
+            <div>{getOrig(sec)}</div>
+          </div>
+          <div className="col-r">
+            <div className="col-label" style={{color:"#22A652"}}>Suggested</div>
+            <div>{mode === "strong" ? <StrongSuggView sec={sec} /> : <span className="teal">{getSugg(sec)}</span>}</div>
+          </div>
+        </div>
+        <div className="rat"><b style={{fontStyle:"normal",color:"#166534"}}>Why: </b>{getRat(sec)}</div>
+        <div style={{display:"flex",alignItems:"center",gap:5}}>
+          <button className="btn-accept" onClick={function(){doAccept(sec)}}>Accept</button>
+          <button className="btn-edit" onClick={function(){doEdit(sec)}}>Edit</button>
+          <button className="btn-keep" onClick={function(){doKeep(sec)}}>Keep mine</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{minHeight:"100vh",display:"flex",justifyContent:"center",padding:12,background:"#F0EBE3"}}>
+      <div className="frame">
+        <div className="hdr">
+          <div className="hdr-icon">{"\uD83D\uDCCB"}</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:15,letterSpacing:-0.3}}>Lesson Plan Checker</div>
+            <div style={{fontSize:11,opacity:0.75}}>Review & improve your plan</div>
+          </div>
+        </div>
+
+        <div className="bod">
+          {/* Toggle */}
+          <div style={{padding:"2px 0 6px"}}>
+            <div style={{fontSize:10,fontWeight:600,color:"#6B6B6B",marginBottom:3}}>Demo:</div>
+            <div className="tog">
+              <button className="tog-btn" onClick={function(){switchMode("strong")}}
+                style={{background:mode==="strong"?"#E8F3ED":"#fff",color:mode==="strong"?"#166534":"#999",borderRight:"1px solid #E5E0DA"}}>{"\u2713"} Strong</button>
+              <button className="tog-btn" onClick={function(){switchMode("weak")}}
+                style={{background:mode==="weak"?"#FFF3E6":"#fff",color:mode==="weak"?"#C2410C":"#999"}}>{"\u26A0"} Weak</button>
+            </div>
+            <div className="tog" style={{marginTop:4}}>
+              <button className="tog-btn" onClick={function(){setKbTog("inlib");setStep(0);setSts({before:"review",during:"review",after:"review"});setEdits({before:"",during:"",after:""});setGenre("");setHasChar("");setHasIllus("");setBookAbout("")}}
+                style={{background:kbTog==="inlib"?"#EEFBF2":"#fff",color:kbTog==="inlib"?"#22A652":"#999",borderRight:"1px solid #E5E0DA"}}>{"\uD83D\uDCDA"} In library</button>
+              <button className="tog-btn" onClick={function(){setKbTog("notlib");setStep(0);setSts({before:"review",during:"review",after:"review"});setEdits({before:"",during:"",after:""});setGenre("");setHasChar("");setHasIllus("");setBookAbout("")}}
+                style={{background:kbTog==="notlib"?"#F5F0EB":"#fff",color:kbTog==="notlib"?"#888":"#999"}}>{"\u2753"} Not in library</button>
+            </div>
+            <div style={{fontSize:10,color:"#999",marginTop:3}}>{"G3 " + DOT + " Infer " + DOT + " The Ugly Duckling"}</div>
+          </div>
+
+          {/* Intro */}
+          <div className="dv"><div className="dv-line" /><span className="dv-label">Intro</span><div className="dv-line" /></div>
+          <div className="bub"><div className="bub-in">
+            <b>{"Hi Ms. Lan! Let" + AP + "s review your plan for Infer."}</b>
+
+            {/* KB notification */}
+            {isKB && <div className="kb-notice" style={{marginTop:8}}>
+              <div style={{fontSize:11,fontWeight:700,color:"#22A652",textTransform:"uppercase",letterSpacing:.8,marginBottom:3}}>{"\u2713"} {bookTitle} is in our library</div>
+              <div style={{fontSize:12,color:"#555"}}>{kb.about}</div>
+              <div style={{fontSize:11,color:"#888",marginTop:4}}>{"I" + AP + "ll give you tips specific to this book."}</div>
+            </div>}
+
+            {/* If NOT in KB, show book questions */}
+            {!isKB && <div style={{marginTop:8}}>
+              <div style={{fontSize:11.5,color:"#666",marginBottom:6}}>{"A few quick details help me tailor suggestions. All optional " + EM + " skip any you like."}</div>
+
+              <div style={{fontSize:12.5,fontWeight:600,marginBottom:5}}>What kind of book?</div>
+              <div style={{display:"flex",gap:5,marginBottom:10}}>
+                <div onClick={function(){setGenre("fiction")}} className={"opt-card" + (genre==="fiction"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>Fiction</b></div>
+                <div onClick={function(){setGenre("nonfiction")}} className={"opt-card" + (genre==="nonfiction"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>Non-fiction</b></div>
+                <div onClick={function(){setGenre("poetry")}} className={"opt-card" + (genre==="poetry"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>Poetry/Other</b></div>
+              </div>
+
+              <div style={{fontSize:12.5,fontWeight:600,marginBottom:5}}>Main character?</div>
+              <div style={{display:"flex",gap:5,marginBottom:10}}>
+                <div onClick={function(){setHasChar("yes")}} className={"opt-card" + (hasChar==="yes"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>Yes</b></div>
+                <div onClick={function(){setHasChar("no")}} className={"opt-card" + (hasChar==="no"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>No</b></div>
+              </div>
+
+              <div style={{fontSize:12.5,fontWeight:600,marginBottom:5}}>Has illustrations?</div>
+              <div style={{display:"flex",gap:5,marginBottom:10}}>
+                <div onClick={function(){setHasIllus("yes")}} className={"opt-card" + (hasIllus==="yes"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>Yes</b></div>
+                <div onClick={function(){setHasIllus("no")}} className={"opt-card" + (hasIllus==="no"?" sel":"")} style={{flex:1,textAlign:"center"}}><b>No</b></div>
+              </div>
+
+              <div style={{fontSize:12.5,fontWeight:600,marginBottom:5}}>{"In a sentence, what" + AP + "s this book about?"}</div>
+              <textarea style={{width:"100%",padding:"8px 10px",borderRadius:10,border:"1.5px solid #E5E0DA",fontSize:12,lineHeight:1.4,background:"#FAFAF8",resize:"none",outline:"none"}} value={bookAbout} onChange={function(e){setBookAbout(e.target.value)}} rows="2" placeholder="e.g. A story about a child who learns to share"/>
+              <div style={{fontSize:10.5,color:"#999",fontStyle:"italic",marginTop:3}}>{"Optional " + EM + " helps me give more specific suggestions."}</div>
+            </div>}
+
+            <button className="btn-next" onClick={function(){go(2)}}>{"Let" + AP + "s review your plan \u2192"}</button>
+          </div></div>
+
+          {/* Before Reading */}
+          {step >= 2 ? (
+            <div>
+              <div className="dv"><div className="dv-line" /><span className="dv-label">Before Reading</span><div className="dv-line" /></div>
+              <div className="bub"><div className="bub-in">
+                {renderSection("before")}
+              </div></div>
+            </div>
+          ) : null}
+
+          {/* During Reading */}
+          {step >= 3 ? (
+            <div>
+              <div className="dv"><div className="dv-line" /><span className="dv-label">During Reading</span><div className="dv-line" /></div>
+              <div className="bub"><div className="bub-in">
+                {renderSection("during")}
+              </div></div>
+            </div>
+          ) : null}
+
+          {/* After Reading */}
+          {step >= 4 ? (
+            <div>
+              <div className="dv"><div className="dv-line" /><span className="dv-label">After Reading</span><div className="dv-line" /></div>
+              <div className="bub"><div className="bub-in">
+                {renderSection("after")}
+                {isDone("after") && (
+                  <div style={{marginTop:10}}>
+                    <div style={{fontSize:11,fontWeight:600,color:"#666",marginBottom:4}}>You might also try:</div>
+                    {getExtras().map(function(ex,i){ return <div key={i} className="act-card">{ex}</div>; })}
+                  </div>
+                )}
+              </div></div>
+            </div>
+          ) : null}
+
+          {/* Summary */}
+          {step >= 5 ? (
+            <div>
+              <div className="dv"><div className="dv-line" /><span className="dv-label">Your Improved Plan</span><div className="dv-line" /></div>
+              <div className="bub"><div className="bub-in">
+                <div className="sum-card">
+                  <div style={{fontSize:11,color:"#999",marginBottom:6}}>{"Grade 3 " + DOT + " " + bookTitle + " " + DOT + " Objective: Infer"}</div>
+                  <div>
+                    <div className="sum-label">Before Reading</div>
+                    <div className="sum-text">{getFinal("before")}</div>
+                  </div>
+                  <div className="sum-sec">
+                    <div className="sum-label">During Reading</div>
+                    <div className="sum-text">{getFinal("during")}</div>
+                  </div>
+                  <div className="sum-sec">
+                    <div className="sum-label">After Reading</div>
+                    <div className="sum-text">{getFinal("after")}</div>
+                  </div>
+                </div>
+                <div style={{textAlign:"center",marginTop:14}}>
+                  <div style={{fontSize:22,marginBottom:3}}>{"\uD83C\uDF1F"}</div>
+                  <div style={{fontWeight:700,color:"#166534",fontSize:14}}>Plan updated! Good luck, Ms. Lan.</div>
+                  <button className="btn-final">Save and Done</button>
+                </div>
+              </div></div>
+            </div>
+          ) : null}
+
+          <div ref={endRef} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById("root"));
+</script>
+</body>
+</html>
